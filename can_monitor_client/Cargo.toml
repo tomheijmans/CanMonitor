@@ -1,0 +1,11 @@
+[package]
+name = "can_monitor_client"
+version = "0.1.0"
+authors = ["Tom Heijmans <tom@tomheijmans.nl>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.32"
+serialport = "4.0"
+crossterm = "0.18"
+tui = { version = "0.13", default-features = false, features = ['crossterm'] }
