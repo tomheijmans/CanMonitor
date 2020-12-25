@@ -16,9 +16,6 @@ void setup() {
 }
 
 void loop() {
-//  Serial.print(millis());
-//  Serial.print(";");
-//  Serial.println(random(300));
   String line = readLine();
   if(line == ""){
     demoFile.close();
@@ -26,7 +23,7 @@ void loop() {
   }else{
     Serial.println(line);
   }
-  delay(10);
+  //delay(10);
 }
 
 String readLine()

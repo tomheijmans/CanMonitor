@@ -11,14 +11,13 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
     let mut should_break = false;
     let (tx, rx) = mpsc::channel();
-
+    let id_to_monitor = 128;
+    
     thread::spawn(move || {
-        app::serial_worker::read_serial(&"COM3", 115200, tx);
+        app::serial_worker::read_serial(&"COM3", 115200, tx, id_to_monitor);
     });
 
     terminal.clear()?;
-
-    let id_to_monitor = 128;
 
     let mut chart_model = models::ChartModel::new(id_to_monitor, 100);
     loop {
@@ -35,7 +34,7 @@ fn main() -> Result<(), io::Error> {
                 break;
             }
         }
-        terminal.draw(|f| app::ui::draw_charts(f, &chart_model))?;
+        terminal.draw(|f| app::ui::draw(f, &chart_model))?;
 
         if event::poll(Duration::from_secs(0)).unwrap() {
             if let CEvent::Key(key) = event::read().unwrap() {

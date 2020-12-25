@@ -1,4 +1,3 @@
-// demo: CAN-BUS Shield, receive data and save to sd card, can.csv
 // when in interrupt mode, the data coming can't be too fast, must >20ms, or else you can use check mode
 // NOTE: Only CAN Bus Shield V2.0 has SD slot, for other versions, you need an SD card Shield as well
 // loovee, Jun 12, 2017
