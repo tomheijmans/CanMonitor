@@ -34,14 +34,14 @@ impl CanLine {
         }
     }
 
-    pub fn get_value(self, byte_start: i8, byte_end: i8) -> f64 {
+    pub fn get_value(self, byte_start: u8, byte_end: u8) -> f64 {
         let mut vals: [u8; 8] = [0; 8];
-
         let mut i = 0;
         let dif = byte_end - byte_start;
+
         for byte in &self.bytes {
             if i >= byte_start && i <= byte_end {
-                vals[(i + dif) as usize] = *byte;
+                vals[(7 - dif + (i - byte_start)) as usize] = *byte;
             }
             i += 1;
         }
