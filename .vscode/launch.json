@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/can_monitor_client/target/debug/can_monitor_client.exe",
-            "args": [],
+            "args": ["COM3"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

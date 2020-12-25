@@ -6,8 +6,8 @@ use std::sync::mpsc::Sender;
 
 use crate::models::CanLine;
 
-pub fn read_serial(port_name: &str, baud_rate: u32, writer: Sender<CanLine>, id_to_monitor: u32) {
-    let port = serialport::new(port_name, baud_rate)
+pub fn read_serial(port_name: String, baud_rate: u32, writer: Sender<CanLine>, id_to_monitor: u32) {
+    let port = serialport::new(&port_name, baud_rate)
         .timeout(Duration::from_millis(10))
         .open();
 
@@ -18,39 +18,22 @@ pub fn read_serial(port_name: &str, baud_rate: u32, writer: Sender<CanLine>, id_
             let mut value_string: String;
             loop {
                 match port.read(serial_buf.as_mut_slice()) {
-                    Ok(t) => {
-                        match std::str::from_utf8(&serial_buf[..t]) {
-                            Ok(val) => {
-                                value_string = format!("{}{}", last, val);
-                                let lines = value_string.split("\r\n").collect::<Vec<&str>>();
-                                last = lines.last().unwrap();
-                                for line in lines {
-                                    if &last != &line {
-                                        let canline = CanLine::new(line);
-                                        if canline.id == id_to_monitor {
-                                            writer.send(canline).unwrap();
-                                        }
+                    Ok(t) => match std::str::from_utf8(&serial_buf[..t]) {
+                        Ok(val) => {
+                            value_string = format!("{}{}", last, val);
+                            let lines = value_string.split("\r\n").collect::<Vec<&str>>();
+                            last = lines.last().unwrap();
+                            for line in lines {
+                                if &last != &line {
+                                    let canline = CanLine::new(line);
+                                    if canline.id == id_to_monitor {
+                                        writer.send(canline).unwrap();
                                     }
                                 }
                             }
-                            _ => {}
                         }
-
-                        // let val = std::str::from_utf8(&serial_buf[..t]).unwrap();
-                        // value_string = format!("{}{}", last, val);
-                        // let lines = value_string.split("\r\n").collect::<Vec<&str>>();
-
-                        // last = lines.last().unwrap();
-
-                        // for line in lines {
-                        //     if &last != &line  {
-                        //         let canline = CanLine::new(line);
-                        //         if canline.id == 128 {
-                        //             writer.send(canline).unwrap();
-                        //         }
-                        //     }
-                        // }
-                    }
+                        _ => {}
+                    },
                     Err(ref e) if e.kind() == io::ErrorKind::TimedOut => (),
                     Err(e) => eprintln!("{:?}", e),
                 }
