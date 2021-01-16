@@ -8,9 +8,9 @@ use tui::{
     Frame,
 };
 
-use crate::models::ChartModel;
+use crate::models::{CanLine, ChartModel, ViewState};
 
-pub fn draw<'a, B>(f: &mut Frame<B>, chart_model: &ChartModel)
+pub fn draw<B>(f: &mut Frame<B>, view_state: &ViewState)
 where
     B: Backend,
 {
@@ -19,18 +19,108 @@ where
         .direction(Direction::Horizontal)
         .split(f.size());
 
-    draw_value(f, chunks[0], chart_model);
-    draw_charts(f, chunks[1], chart_model);
+    let right_chunks = Layout::default()
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
+        .direction(Direction::Vertical)
+        .split(chunks[1]);
+
+    draw_value(f, chunks[0], &view_state.chart_model);
+    draw_header(f, right_chunks[0], &view_state);
+    draw_charts(f, right_chunks[1], &view_state.chart_model);
 }
 
-fn draw_value<'a, B>(f: &mut Frame<B>, area: Rect, chart_model: &ChartModel)
+fn draw_header<B>(f: &mut Frame<B>, area: Rect, view_state: &ViewState)
+where
+    B: Backend,
+{
+    let mut text = Vec::new();
+    for can_line in view_state.get_last_can_lines(5) {
+        text.push(Spans::from(vec![
+            span_for_byte(
+                can_line,
+                0,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                1,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                2,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                3,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                4,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                5,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                6,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+            span_for_byte(
+                can_line,
+                7,
+                view_state.byte_index_start,
+                view_state.byte_index_end,
+            ),
+        ]));
+    }
+
+    let block = Block::default().borders(Borders::ALL).title(Span::styled(
+        "Values",
+        Style::default()
+            .fg(Color::Magenta)
+            .add_modifier(Modifier::BOLD),
+    ));
+    let paragraph = Paragraph::new(text).block(block);
+    f.render_widget(paragraph, area);
+}
+
+fn span_for_byte<'a>(
+    can_line: &CanLine,
+    index: u8,
+    mark_start_index: u8,
+    mark_end_index: u8,
+) -> Span {
+    let mut style: Style = Style::default();
+    if index >= mark_start_index && index <= mark_end_index {
+        style = Style::default()
+            .fg(Color::Magenta)
+            .add_modifier(Modifier::BOLD);
+    }
+
+    Span::styled(format!("{:08b} ", can_line.get_byte(index as usize)), style)
+}
+
+fn draw_value<B>(f: &mut Frame<B>, area: Rect, chart_model: &ChartModel)
 where
     B: Backend,
 {
     let value = &chart_model.get_last_value();
     let text = vec![Spans::from(vec![Span::styled(
         value.to_string(),
-        Style::default().add_modifier(Modifier::REVERSED),
+        Style::default(),
     )])];
     let block = Block::default().borders(Borders::ALL).title(Span::styled(
         "Values",
@@ -38,11 +128,11 @@ where
             .fg(Color::Magenta)
             .add_modifier(Modifier::BOLD),
     ));
-    let paragraph = Paragraph::new(text).block(block); 
+    let paragraph = Paragraph::new(text).block(block);
     f.render_widget(paragraph, area);
 }
 
-fn draw_charts<'a, B>(f: &mut Frame<B>, area: Rect, chart_model: &ChartModel)
+fn draw_charts<B>(f: &mut Frame<B>, area: Rect, chart_model: &ChartModel)
 where
     B: Backend,
 {

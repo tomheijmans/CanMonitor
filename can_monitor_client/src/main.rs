@@ -65,22 +65,23 @@ fn main() -> Result<(), io::Error> {
 
     terminal.clear()?;
 
-    let mut chart_model = models::ChartModel::new(id_to_monitor, 100);
+    let mut view_state = models::ViewState::new(
+        id_to_monitor,
+        byte_index_start,
+        byte_index_end,
+        models::ChartModel::new(100),
+    );
+
     loop {
         match rx.try_recv() {
-            Ok(line) => {
-                if line.id == id_to_monitor {
-                    let value = line.get_value(byte_index_start, byte_index_end);
-                    chart_model.add_value(value);
-                }
-            }
+            Ok(line) => view_state.process_new_value(line),
             Err(mpsc::TryRecvError::Empty) => (),
             Err(mpsc::TryRecvError::Disconnected) => {
                 println!("Stopping.");
                 break;
             }
         }
-        terminal.draw(|f| app::ui::draw(f, &chart_model))?;
+        terminal.draw(|f| app::ui::draw(f, &view_state))?;
 
         if event::poll(Duration::from_secs(0)).unwrap() {
             if let CEvent::Key(key) = event::read().unwrap() {

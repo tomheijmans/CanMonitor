@@ -1,7 +1,6 @@
 use std::cmp;
 
 pub struct ChartModel {
-    pub id: u32,
     values_on_x: usize,
     next_x: i64,
     pub x_window: [f64; 2],
@@ -10,9 +9,8 @@ pub struct ChartModel {
 }
 
 impl ChartModel {
-    pub fn new(id: u32, values_on_x: usize) -> ChartModel {
+    pub fn new(values_on_x: usize) -> ChartModel {
         ChartModel {
-            id: id,
             values_on_x: values_on_x,
             next_x: 1,
             x_window: [0.0, values_on_x as f64],

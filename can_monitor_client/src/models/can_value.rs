@@ -34,7 +34,7 @@ impl CanLine {
         }
     }
 
-    pub fn get_value(self, byte_start: u8, byte_end: u8) -> f64 {
+    pub fn get_value(&self, byte_start: u8, byte_end: u8) -> f64 {
         let mut vals: [u8; 8] = [0; 8];
         let mut i = 0;
         let dif = byte_end - byte_start;
@@ -47,5 +47,9 @@ impl CanLine {
         }
 
         i64::from_be_bytes(vals) as f64
+    }
+
+    pub fn get_byte(&self, index: usize) -> u8 {
+        self.bytes[index]
     }
 }
