@@ -2,6 +2,7 @@
 
 File demoFile;
 const int SPI_CS_SD     = 9;
+const String filename = "Demo2.CSV";
 
 void setup() {
   // put your setup code here, to run once:
@@ -12,14 +13,14 @@ void setup() {
       while (1);
   }
 
-  demoFile = SD.open("Demo.CSV");
+  demoFile = SD.open(filename);
 }
 
 void loop() {
   String line = readLine();
   if(line == ""){
     demoFile.close();
-    demoFile = SD.open("Demo.CSV");
+    demoFile = SD.open(filename);
   }else{
     Serial.println(line);
   }
